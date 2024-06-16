@@ -10,7 +10,7 @@ import os.path
 from tornado.options import define, options
 
 define("port", default=8888, help="run on the given port", type=int)
-define("secret", help="upstream secret token", type=str)
+define("secrets", multiple=True, help="upstream secret tokens", type=str)
 
 secret_to_url = {}
 
