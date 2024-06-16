@@ -42,7 +42,9 @@ class StreamHandler(tornado.web.RequestHandler):
             self.write_error(403)
             return
         url = secret_to_url[secret]
+        logging.info('Data received for secret: %s, broadcasting to: %s', secret, url)
         SocketHandler.broadcast(data, url)
+        logging.info('Broadcasted data to WebSocket for URL: %s', url)
 
 
 class SocketHandler(tornado.websocket.WebSocketHandler):
@@ -76,9 +78,11 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
     @classmethod
     def broadcast(cls, data, url):
         if url in cls.waiters:
+            logging.info('Broadcasting data to %d waiters for URL: %s', len(cls.waiters[url]), url)
             for waiter in cls.waiters[url]:
                 try:
                     waiter.write_message(data, binary=True)
+                    logging.info('Data successfully sent to a waiter for URL: %s', url)
                 except tornado.websocket.WebSocketClosedError:
                     logging.error("Error sending message", exc_info=True)
 
