@@ -19,7 +19,7 @@ class Application(tornado.web.Application):
         handlers = [
             (r"/", MainHandler),
             (r"/upload/(.*)", StreamHandler),
-            (r"/live/(.*)", SocketHandler),
+            (r"/live/(.*\.ts)", SocketHandler),
         ]
         settings = dict(
             template_path=os.path.join(os.path.dirname(__file__), 'templates'),
@@ -86,7 +86,7 @@ def main():
     if options.secrets:
         for secret in options.secrets:
             # Associate each secret with a corresponding URL
-            secret_to_url[secret] = f'live/{secret}'
+            secret_to_url[secret] = f'live/{secret}.ts'
 
     app = Application()
     app.listen(options.port)
