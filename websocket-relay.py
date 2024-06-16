@@ -54,6 +54,7 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
         return True
 
     def open(self, url):
+        url = f'live/{url}'
         logging.info('WebSocket open for URL: %s', url)
         if url not in SocketHandler.waiters:
             SocketHandler.waiters[url] = set()
