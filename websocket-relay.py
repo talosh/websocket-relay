@@ -57,10 +57,12 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
         SocketHandler.waiters[url].add(self)
         logging.info(f'New WebSocket Connection for {url}: {len(SocketHandler.waiters[url])} total')
 
+    '''
     def select_subprotocol(self, subprotocol):
         if len(subprotocol):
             return subprotocol[0]
         return super().select_subprotocol(subprotocol)
+    '''
 
     def on_message(self, message):
         pass
