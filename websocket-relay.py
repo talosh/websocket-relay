@@ -94,6 +94,7 @@ def main():
         for secret in options.secrets:
             # Associate each secret with a corresponding URL
             secret_to_url[secret] = f'live/{secret}.ts'
+            logging.info('Mapping secret %s to URL %s', secret, secret_to_url[secret])
 
     app = Application()
     app.listen(options.port)
