@@ -16,7 +16,7 @@ if (mpegts.getFeatureList().mseLivePlayback) {
         var player = mpegts.createPlayer({
             type: 'mpegts',  // could also be mpegts, m2ts, flv
             isLive: true,
-            url: 'wss://live.humppakone.com/live.ts'
+            url: 'wss://192.168.1.99/live.ts'
         });
         player.attachMediaElement(videoElement);
         player.load();
