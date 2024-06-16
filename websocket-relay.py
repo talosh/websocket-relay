@@ -42,9 +42,9 @@ class StreamHandler(tornado.web.RequestHandler):
             self.write_error(403)
             return
         url = secret_to_url[secret]
-        logging.info('Data received for secret: %s, broadcasting to: %s', secret, url)
+        # logging.info('Data received for secret: %s, broadcasting to: %s', secret, url)
         SocketHandler.broadcast(data, url)
-        logging.info('Broadcasted data to WebSocket for URL: %s', url)
+        # logging.info('Broadcasted data to WebSocket for URL: %s', url)
 
 
 class SocketHandler(tornado.websocket.WebSocketHandler):
@@ -54,10 +54,11 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
         return True
 
     def open(self, url):
+        logging.info('WebSocket open for URL: %s', url)
         if url not in SocketHandler.waiters:
             SocketHandler.waiters[url] = set()
         SocketHandler.waiters[url].add(self)
-        logging.info(f'New WebSocket Connection for {url}: {len(SocketHandler.waiters[url])} total')
+        logging.info('New WebSocket Connection for %s: %d total', url, len(SocketHandler.waiters[url]))
 
     '''
     def select_subprotocol(self, subprotocol):
