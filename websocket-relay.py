@@ -24,6 +24,7 @@ class Application(tornado.web.Application):
         settings = dict(
             template_path=os.path.join(os.path.dirname(__file__), 'templates'),
             static_path=os.path.join(os.path.dirname(__file__), 'static'),
+            max_body_size=1024 * 1024 * 500,
         )
         super(Application, self).__init__(handlers, **settings)
 
