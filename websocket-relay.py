@@ -161,11 +161,20 @@ def main():
             # Associate each secret with a corresponding URL
             secret_to_url[secret] = f'live/{secret}.ts'
             logging.info('Mapping secret %s to URL %s', secret, secret_to_url[secret])
-    else:
-        print ('huipizda')
-        import sys
-        sys.exit()
 
+    secret_to_url['english'] = f'live/english.ts'
+    secret_to_url['bulgarian'] = f'live/bulgarian.ts'
+    secret_to_url['czech'] = f'live/czech.ts'
+    secret_to_url['french'] = f'live/french.ts'
+    secret_to_url['german'] = f'live/german.ts'
+    secret_to_url['hungarian'] = f'live/hungarian.ts'
+    secret_to_url['italian'] = f'live/italian.ts'
+    secret_to_url['polish'] = f'live/polish.ts'
+    secret_to_url['portuguese'] = f'live/portuguese.ts'
+    secret_to_url['russian'] = f'live/russian.ts'
+    secret_to_url['spanish'] = f'live/spanish.ts'
+    secret_to_url['ukrainian'] = f'live/ukrainian.ts'
+    
     app = Application()
     app.listen(options.port)
     logging.info('Application started on port %d', options.port)
