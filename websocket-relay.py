@@ -149,7 +149,8 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
                 except tornado.websocket.WebSocketClosedError:
                     logging.error("Error sending message", exc_info=True)
         else:
-            logging.info('No waiters to broadcast to for URL: %s', url)
+            pass
+            # logging.info('No waiters to broadcast to for URL: %s', url)
 
 
 def main():
