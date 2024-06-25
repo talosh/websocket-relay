@@ -33,7 +33,7 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('view-stream.html')
 
-
+'''
 @tornado.web.stream_request_body
 class StreamHandler(tornado.web.RequestHandler):
     def data_received(self, data):
@@ -46,8 +46,35 @@ class StreamHandler(tornado.web.RequestHandler):
         # logging.info('Data received for secret: %s, broadcasting to: %s', secret, url)
         SocketHandler.broadcast(data, url)
         # logging.info('Broadcasted data to WebSocket for URL: %s', url)
+'''
 
+@tornado.web.stream_request_body
+class StreamHandler(tornado.web.RequestHandler):
+    def data_received(self, data):
+        try:
+            secret = self.request.path.split('/')[-1]
+            if secret not in secret_to_url:
+                logging.info('Failed Stream Connection: %s - wrong secret.', self.request.remote_ip)
+                self.write_error(403)
+                return
+            url = secret_to_url[secret]
+            # logging.info('Data received for secret: %s, broadcasting to: %s', secret, url)
+            SocketHandler.broadcast(data, url)
+            # logging.info('Broadcasted data to WebSocket for URL: %s', url)
+        except Exception as e:
+            logging.error("Error in data_received: %s", str(e))
+            self.write_error(500)
 
+    def write_error(self, status_code, **kwargs):
+        if status_code == 500:
+            logging.error("Internal server error while processing request")
+        elif status_code == 403:
+            self.set_status(403)
+            self.finish("Forbidden: wrong secret")
+        else:
+            super(StreamHandler, self).write_error(status_code, **kwargs)
+
+'''
 class SocketHandler(tornado.websocket.WebSocketHandler):
     waiters = {}
 
@@ -62,12 +89,10 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
         SocketHandler.waiters[url].add(self)
         logging.info('New WebSocket Connection for %s: %d total', url, len(SocketHandler.waiters[url]))
 
-    '''
     def select_subprotocol(self, subprotocol):
         if len(subprotocol):
             return subprotocol[0]
         return super().select_subprotocol(subprotocol)
-    '''
 
     def on_message(self, message):
         pass
@@ -88,6 +113,44 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
                     # logging.info('Data successfully sent to a waiter for URL: %s', url)
                 except tornado.websocket.WebSocketClosedError:
                     logging.error("Error sending message", exc_info=True)
+'''
+
+class SocketHandler(tornado.websocket.WebSocketHandler):
+    waiters = {}
+
+    def check_origin(self, origin):
+        return True
+
+    def open(self, url):
+        url = f'live/{url}'
+        logging.info('WebSocket open for URL: %s', url)
+        if url not in SocketHandler.waiters:
+            SocketHandler.waiters[url] = set()
+        SocketHandler.waiters[url].add(self)
+        logging.info('New WebSocket Connection for %s: %d total', url, len(SocketHandler.waiters[url]))
+
+    def on_message(self, message):
+        pass
+
+    def on_close(self):
+        for waiters in SocketHandler.waiters.values():
+            if self in waiters:
+                waiters.remove(self)
+                logging.info('Disconnected WebSocket: %d total', len(waiters))
+
+    @classmethod
+    def broadcast(cls, data, url):
+        if url in cls.waiters:
+            # logging.info('Broadcasting data to %d waiters for URL: %s', len(cls.waiters[url]), url)
+            for waiter in cls.waiters[url]:
+                try:
+                    waiter.write_message(data, binary=True)
+                    # logging.info('Data successfully sent to a waiter for URL: %s', url)
+                except tornado.websocket.WebSocketClosedError:
+                    logging.error("Error sending message", exc_info=True)
+        else:
+            logging.info('No waiters to broadcast to for URL: %s', url)
+
 
 def main():
     tornado.options.parse_command_line()
@@ -100,6 +163,7 @@ def main():
 
     app = Application()
     app.listen(options.port)
+    logging.info('Application started on port %d', options.port)
     tornado.ioloop.IOLoop.current().start()
 
 
